@@ -30,12 +30,11 @@ Construir un prototipo base estilo “Minecraft realista” en UE5 con:
 - Mesa de crafteo con recetas iniciales.
 - Herramientas: hacha, pico, pala, espada.
 - Personaje por defecto con animaciones y uso de herramientas.
+- Sistema de supervivencia desde el inicio: hambre, sed y vida por defecto.
 
 **No incluye (por ahora):**
 - Animales/NPCs.
-- Hambre/sed.
 - Construcción avanzada.
-- Multijugador.
 
 ---
 
@@ -47,9 +46,9 @@ Construir un prototipo base estilo “Minecraft realista” en UE5 con:
 - Se muestra la semilla usada en HUD.
 
 ### 3.2 Generación de mundo
-**Opción recomendada:** Voxel basado en chunks.
-- **Chunk**: 16x16x128 (editable).
-- **Ruido**: Perlin/Simplex (FastNoise2 o plugin similar).
+**Opción definida:** Voxel basado en chunks.
+- **Chunk**: 32x32x128 (seleccionado para equilibrar detalle y costo de generación; validaremos rendimiento).
+- **Ruido**: Perlin/Simplex con **FastNoise2** (plugin obligatorio).
 - **Datos**: mapa de altura + capas por tipo de bloque.
 - **LOD/optimización**: generación por distancia al jugador.
 
@@ -76,10 +75,13 @@ Construir un prototipo base estilo “Minecraft realista” en UE5 con:
 - Recetas en `DataTable` o `PrimaryDataAsset`.
 - UI de crafteo simple con slots.
 
-### 3.7 Combate y herramientas
+### 3.7 Combate, herramientas y supervivencia
 - Herramientas con daño y eficiencia.
 - Sistema de golpes con trazas (line trace / sphere trace).
 - Durabilidad simple (opcional para MVP).
+- Sistema de supervivencia inicial:
+  - Hambre y sed con decremento por tiempo/acciones.
+  - Vida base (HP) con regeneración limitada.
 
 ---
 
@@ -147,16 +149,14 @@ Content/
 ---
 
 ## 8) Próximos pasos
-- Definir si el terreno será **voxel** o **mesh procedural** (recomendado voxel).
-- Elegir plugin de ruido (FastNoise2 recomendado).
 - Validar tamaño de chunk con pruebas de rendimiento.
-- Definir estilo visual (materiales PBR, iluminación).
+- Definir estilo visual de **voxel realista** (materiales PBR, iluminación).
+- Planear arquitectura para **multijugador futuro** (replicación y determinismo).
 
 ---
 
 ## 9) Preguntas abiertas
-- ¿Preferimos estilo voxel realista o mesh con deformación?
-- ¿Se desea multijugador en el futuro?
-- ¿Se quiere sistema de supervivencia (hambre/sed) desde el inicio?
+- ¿Qué objetivos y penalizaciones tendrá el sistema de hambre/sed (ej. debuffs)?
+- ¿Cuál será la escala del mundo y el límite de expansión antes de streaming avanzado?
 
 Con este diseño, podemos iniciar implementación de los sistemas base y ajustar sobre la marcha.
