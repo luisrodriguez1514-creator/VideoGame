@@ -156,7 +156,9 @@ Content/
 ---
 
 ## 9) Preguntas abiertas
-- ¿Qué objetivos y penalizaciones tendrá el sistema de hambre/sed (ej. debuffs)?
-- ¿Cuál será la escala del mundo y el límite de expansión antes de streaming avanzado?
+- Penalizaciones por hambre y sed:
+  - **Hambre**: efecto negativo de hambre → mareo y fatiga → pérdida gradual de vida hasta morir.
+  - **Sed**: efecto de insolación → pérdida gradual de vida hasta morir.
+- Escala inicial del mundo: **5,000 x 5,000 metros** antes de requerir streaming avanzado.
 
 Con este diseño, podemos iniciar implementación de los sistemas base y ajustar sobre la marcha.
