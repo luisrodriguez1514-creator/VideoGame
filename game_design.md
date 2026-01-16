@@ -1,4 +1,4 @@
-# Diseño inicial: Mundo abierto procedural (Unreal Engine 5)
+# Diseño del proyecto: Mundo abierto procedural (Unreal Engine 5)
 
 ## Objetivo
 Construir un prototipo base estilo “Minecraft realista” en UE5 con:
@@ -10,97 +10,153 @@ Construir un prototipo base estilo “Minecraft realista” en UE5 con:
 
 ---
 
-## 1) Generación de mundo procedural por semillas
-**Meta:** El mundo se genera a partir de una semilla. Si el jugador no ingresa una, el juego genera una aleatoria y la muestra en pantalla/menú para compartirla.
+## 1) Visión general del proyecto
+**Nombre (provisional):** RealistaCraft
 
-**Propuesta técnica (UE5):**
-- **Sistema de semillas**
-  - Si el jugador no ingresa una semilla, se genera con `FMath::Rand()` o `FMath::RandRange()` y se guarda.
-  - Se muestra la semilla usada en UI (pantalla de creación o HUD).
-- **Ruido para el terreno**
-  - Usar Perlin/Simplex (FastNoise, ProceduralMesh, o plugin de ruido).
-  - Parametrizar: altura base, frecuencia, amplitud, rugosidad.
-- **Biomas básicos iniciales**
-  - Llanura y dunas (arena).
-  - Separación por altura y/o temperatura (más adelante).
-
-**Resultado esperado:** Un mapa consistente que se repite siempre con la misma semilla.
+**Pilares del diseño:**
+1. **Exploración procedural**: mundos reproducibles por semilla.
+2. **Supervivencia ligera**: recolección, crafteo y herramientas básicas.
+3. **Interacción del mundo**: excavar, talar, picar con feedback inmediato.
+4. **Realismo visual moderado**: iluminación y materiales más realistas que Minecraft.
 
 ---
 
-## 2) Materiales básicos y excavación
-**Materiales iniciales:**
-- Tierra
-- Arena
-- Piedra
-- Carbón
-- Madera
+## 2) Alcance del MVP (primera versión jugable)
+**Incluye:**
+- Terreno procedural por semillas con 2 biomas iniciales (llanura/arena).
+- Bloques base: tierra, arena, piedra, carbón.
+- Árbol único con rebrote.
+- Inventario simple (stacking básico).
+- Mesa de crafteo con recetas iniciales.
+- Herramientas: hacha, pico, pala, espada.
+- Personaje por defecto con animaciones y uso de herramientas.
 
-**Reglas de recolección:**
-- Al excavar/bloquear, dar el item correspondiente:
-  - Tierra → “Bolsa de tierra”
-  - Arena → “Arena”
-  - Piedra → “Piedra”
-  - Carbón → “Carbón”
-- Profundidad:
-  - Superficie: tierra/arena.
-  - Debajo: piedra.
-  - Carbón en vetas raras dentro de piedra.
+**No incluye (por ahora):**
+- Animales/NPCs.
+- Hambre/sed.
+- Construcción avanzada.
+- Multijugador.
 
 ---
 
-## 3) Árboles
-**Árbol único inicial** (1 tipo):
-- Al talar:
-  - Entrega X madera.
-  - Deja un rebrote (sapling) para replantar.
+## 3) Arquitectura técnica propuesta (UE5)
+
+### 3.1 Sistema de semillas
+- Entrada de semilla en UI (pantalla inicial).
+- Si no hay semilla, se genera con `FMath::Rand()` y se guarda.
+- Se muestra la semilla usada en HUD.
+
+### 3.2 Generación de mundo
+**Opción recomendada:** Voxel basado en chunks.
+- **Chunk**: 16x16x128 (editable).
+- **Ruido**: Perlin/Simplex (FastNoise2 o plugin similar).
+- **Datos**: mapa de altura + capas por tipo de bloque.
+- **LOD/optimización**: generación por distancia al jugador.
+
+### 3.3 Sistema de bloques
+- Cada bloque tiene:
+  - Tipo (tierra/arena/piedra/carbón)
+  - Resistencia
+  - Loot asociado
+- Al romper un bloque, se genera el item correspondiente.
+
+### 3.4 Inventario y loot
+- Inventario en UI con stacks por item.
+- Loot directo a inventario si hay espacio.
+- Items base: tierra, arena, piedra, carbón, madera, rebrote.
+
+### 3.5 Árboles y rebrote
+- Árbol único con reglas simples:
+  - Talado da madera.
+  - Cae un rebrote para replantar.
+- Replantación en tierra válida.
+
+### 3.6 Crafteo
+- Mesa de crafteo como actor interactivo.
+- Recetas en `DataTable` o `PrimaryDataAsset`.
+- UI de crafteo simple con slots.
+
+### 3.7 Combate y herramientas
+- Herramientas con daño y eficiencia.
+- Sistema de golpes con trazas (line trace / sphere trace).
+- Durabilidad simple (opcional para MVP).
 
 ---
 
-## 4) Mesa de crafteo y recetas iniciales
-**Mesa de crafteo:**
-- Requiere madera (2) y piedra (2).
+## 4) Diseño de contenido inicial
 
-**Herramientas iniciales:**
-| Herramienta | Materiales propuestos | Daño base | Uso |
-|-----------|-----------------------|----------|-----|
-| Hacha     | 2 madera + 5 piedra   | 10       | Talado rápido |
-| Pico      | 2 madera + 6 piedra   | 12       | Minería rápida |
-| Pala      | 2 madera + 4 piedra   | 6        | Excavación rápida |
-| Espada    | 2 madera + 8 piedra   | 15       | Combate |
+### 4.1 Materiales básicos
+- Tierra → “Bolsa de tierra”
+- Arena → “Arena”
+- Piedra → “Piedra”
+- Carbón → “Carbón”
+- Madera → “Madera”
+- Rebrote → “Semilla de árbol”
 
-**Nota:** Estos valores son ajustables según feedback.
+### 4.2 Recetas iniciales
+| Item | Materiales | Resultado |
+|------|------------|-----------|
+| Mesa de crafteo | 2 madera + 2 piedra | 1 mesa |
+| Hacha | 2 madera + 5 piedra | 1 hacha |
+| Pico | 2 madera + 6 piedra | 1 pico |
+| Pala | 2 madera + 4 piedra | 1 pala |
+| Espada | 2 madera + 8 piedra | 1 espada |
 
----
-
-## 5) Personaje por defecto y animaciones
-**Personaje base:**
-- Usar el Mannequin de UE5.
-
-**Animaciones mínimas:**
-- Caminar
-- Correr
-- Saltar
-- Agacharse
-- Golpear
-- Usar herramientas (hacha, pico, pala)
-- Usar espada
+### 4.3 Daño base y eficiencia
+- Hacha: daño 10, +50% eficiencia al talar árboles.
+- Pico: daño 12, +50% eficiencia al minar piedra/carbón.
+- Pala: daño 6, +50% eficiencia al excavar tierra/arena.
+- Espada: daño 15 (combate).
 
 ---
 
-## 6) Roadmap propuesto (primeras iteraciones)
-1. **Mundo procedural** con semillas + UI de seed.
-2. **Sistema de bloques** (tierra/arena/piedra/carbón) y recolección.
-3. **Árboles** con loot y rebrote.
-4. **Mesa de crafteo** + recetas iniciales.
-5. **Personaje y animaciones** con herramientas básicas.
+## 5) Personaje y animaciones
+- Usar el **Mannequin de UE5**.
+- Animaciones mínimas:
+  - Caminar, correr, saltar, agacharse.
+  - Golpear.
+  - Usar herramientas (hacha, pico, pala, espada).
 
 ---
 
-## 7) Próximos pasos
-Si este plan te gusta, el siguiente paso sería elegir:
-- Si el terreno será **voxel** (tipo Minecraft) o **mesh procedural**.
-- Qué plugin o sistema de ruido usar.
-- Definir tamaños de chunk y optimización.
+## 6) Estructura de carpetas recomendada
+```
+Content/
+  Blueprints/
+    Player/
+    World/
+    Items/
+    UI/
+  Data/
+    Items/
+    Recipes/
+  Materials/
+  Meshes/
+  Animations/
+```
 
-Con esto arrancamos una base sólida para extender biomeas, animales, estructuras y más.
+---
+
+## 7) Roadmap propuesto
+1. **Semana 1-2**: Sistema de semillas + terreno procedural básico.
+2. **Semana 3**: Bloques base y recolección.
+3. **Semana 4**: Árboles, loot y rebrote.
+4. **Semana 5**: Inventario simple y crafteo.
+5. **Semana 6**: Herramientas, animaciones y combate básico.
+
+---
+
+## 8) Próximos pasos
+- Definir si el terreno será **voxel** o **mesh procedural** (recomendado voxel).
+- Elegir plugin de ruido (FastNoise2 recomendado).
+- Validar tamaño de chunk con pruebas de rendimiento.
+- Definir estilo visual (materiales PBR, iluminación).
+
+---
+
+## 9) Preguntas abiertas
+- ¿Preferimos estilo voxel realista o mesh con deformación?
+- ¿Se desea multijugador en el futuro?
+- ¿Se quiere sistema de supervivencia (hambre/sed) desde el inicio?
+
+Con este diseño, podemos iniciar implementación de los sistemas base y ajustar sobre la marcha.
